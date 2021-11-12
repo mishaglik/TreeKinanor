@@ -19,7 +19,7 @@ CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 
 # CXXFLAGS += $(SANFLAGS)
 
-SOURCES = Tree/Tree.cpp StringBuffer/StringBuffer.cpp
+SOURCES = Tree/Tree.cpp StringBuffer/StringBuffer.cpp Akkinator.cpp Akkinator_Verbose.cpp
 
 HEADERS_CFG = 
 

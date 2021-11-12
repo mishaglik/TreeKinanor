@@ -1,5 +1,6 @@
+#include "../../lib/Stack.h"
+#undef LOCATION
 #include "Tree.h"
-
 
 Node* _createNode(MGK_CTOR_DEC){
     Node* node = (Node*)mgk_calloc(1, sizeof(Node));
@@ -43,4 +44,41 @@ void treeDtor(Tree* tree){
     if(tree->root)
         deleteNode(tree->root);
     
+}
+
+//--------------------------------------------------------------------------
+
+void treeWalk(Node* node, WalkParams* walkparams, void* args, int depth){
+    LOG_ASSERT(node != NULL);
+    LOG_ASSERT(walkparams != NULL);
+
+    #define ACTION(f) if(f){f(node, depth, args);}
+
+    ACTION(walkparams->inFunc);
+
+    if(walkparams->walkMode == WalkMode::Prefix){
+        ACTION(walkparams->curFunc);
+    }
+
+    if(node->left != NULL){
+        treeWalk(node->left, walkparams, args, depth + 1);
+    }
+    else{
+        ACTION(walkparams->nullFunc);
+    }
+
+    if(walkparams->walkMode == WalkMode::Infix){
+        ACTION(walkparams->curFunc);
+    }
+
+    if(node->right != NULL){
+        treeWalk(node->left, walkparams, args, depth + 1);
+    }
+
+    if(walkparams->walkMode == WalkMode::Postfix){
+        ACTION(walkparams->curFunc);
+    }
+
+    ACTION(walkparams->outFunc);
+    #undef ACTION
 }

@@ -29,15 +29,35 @@ struct Tree
     Node* root;
 };
 
-#define createNode() _createNode(MGK_CTOR_CALL)
+typedef void (*walk_action_f)(Node*, int, void*);
+
+enum class WalkMode{
+    Prefix,
+    Infix,
+    Postfix,
+};
+
+struct WalkParams{
+    WalkMode walkMode = WalkMode::Prefix;
+
+    walk_action_f   inFunc = NULL;
+    walk_action_f  outFunc = NULL;
+    walk_action_f  curFunc = NULL;
+    walk_action_f nullFunc = NULL;
+};
+
+#define createNode() _createNode(MGK_CTOR_CALL(NULL))
 Node* _createNode(MGK_CTOR_DEC);
 
 
-#define TreeCtor(...) _TreeCtor(__VA_ARGS__, MGK_CTOR_CALL)
+#define TreeCtor(tree) _TreeCtor(tree, MGK_CTOR_CALL(tree))
 TreeError _TreeCtor(Tree* tree, MGK_CTOR_DEC);
 
 void deleteNode(Node* node);
 
 void treeDtor(Tree* tree);
+
+void treeWalk(Node* node, WalkParams* walkparams, void* args = NULL, int depth = 0);
+
 
 #endif
