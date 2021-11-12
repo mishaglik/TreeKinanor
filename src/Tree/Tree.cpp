@@ -83,6 +83,21 @@ void treeWalk(Node* node, WalkParams* walkparams, void* args, int depth){
     #undef ACTION
 }
 
-int nodeHash(Node* node){
-    return *(int*)(void*)(&node);
+Node* treeFind(Node* node, Stack* stack, tree_data_t search){
+    LOG_ASSERT(node  != NULL);
+    LOG_ASSERT(stack != NULL);
+
+    stack_push(stack, node);
+
+    if(node->data == search){
+        return node;
+    }
+
+    if(node->left && treeFind(node->left, stack, search)) return (Node*)stack->data[stack->size - 1];
+
+    if(node->right && treeFind(node->right, stack, search)) return (Node*)stack->data[stack->size - 1];
+
+    stack_pop(stack);
+
+    return NULL;
 }

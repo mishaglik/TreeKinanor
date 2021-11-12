@@ -3,6 +3,7 @@
 
 #include "stdlib.h"
 #include "../../lib/Logger.h"
+#include "../../lib/Stack.h"
 #include "../../lib/utils.h"
 
 typedef const char* tree_data_t;
@@ -59,6 +60,6 @@ void treeDtor(Tree* tree);
 
 void treeWalk(Node* node, WalkParams* walkparams, void* args = NULL, int depth = 0);
 
-int nodeHash(Node* node);
+Node* treeFind(Node* node, Stack* stack, tree_data_t search);
 
 #endif

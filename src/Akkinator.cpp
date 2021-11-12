@@ -110,14 +110,58 @@ void akkinatorPlayGame(Akkinator* akkinator){
 
 void akkinatorGetDefinition(Akkinator* akkinator){
     LOG_ASSERT(akkinator != NULL);
-    LOG_FATAL("%s not implemented yet", __func__);
+
+    char* str = askForDef();
+    Stack stack = {};
+
+    stack_init(&stack);
+
+    treeFind(akkinator->tree.root, &stack, stringBufferFindSame(&akkinator->stringBuf, str));
+
+    printDef(&stack);
+
+    stack_free(&stack);
+    free(str);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void akkinatorSplitDifference(Akkinator* akkinator){
     LOG_ASSERT(akkinator != NULL);
-    LOG_FATAL("%s not implemented yet", __func__);
+
+    char* str1 = askForDiff1();
+
+    const char* trueStr1 = stringBufferFindSame(&akkinator->stringBuf, str1);
+
+    if(!trueStr1){
+        printDontKnow(str1);
+        free(str1);
+        return;
+    }
+
+    char* str2 = askForDiff2();
+    const char* trueStr2 = stringBufferFindSame(&akkinator->stringBuf, str2);
+    if(!trueStr2){
+        printDontKnow(str2);
+        free(str1);
+        free(str2);
+        return;
+    }
+
+    Stack st1 = {}, st2 = {};
+
+    stack_init(&st1);
+    stack_init(&st2);
+
+    treeFind(akkinator->tree.root, &st1, trueStr1);
+    treeFind(akkinator->tree.root, &st2, trueStr2);
+
+    printDiff(&st1, &st2);
+
+    stack_free(&st1);
+    stack_free(&st2);
+    free(str1);
+    free(str2);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,4 +306,5 @@ void akkinatorWrite(Akkinator* akkinator, const char* filename){
 
     fclose(file);
 }
+
 

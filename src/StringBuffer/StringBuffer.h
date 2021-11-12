@@ -18,4 +18,6 @@ size_t stringBufferPush(StringBuffer* buffer, const char* string);
 
 void stringBufferDtor(StringBuffer* buffer);
 
+const char* stringBufferFindSame(StringBuffer* buffer, const char* string);
+
 #endif

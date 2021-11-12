@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "StringBuffer.h"
 #include "../../lib/Logger.h"
 #include "../../lib/utils.h"
@@ -51,4 +53,17 @@ void stringBufferDtor(StringBuffer* buffer){
     buffer->size = 0;
     buffer->capacity = 0;
 
+}
+
+const char* stringBufferFindSame(StringBuffer* buffer, const char* string){
+    LOG_ASSERT(buffer != NULL);
+    LOG_ASSERT(string != NULL);
+
+    for(size_t i = 0; i < buffer->size; ++i){
+        if(strcmp(string, buffer->strings[i]) == 0){
+            return buffer->strings[i];
+        }
+    }
+
+    return NULL;
 }

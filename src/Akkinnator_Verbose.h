@@ -47,4 +47,18 @@ char* askAskedPerson();
 
 char* askDifference(const char* first, const char* second);
 
+char* askForDef();
+
+char* askForDiff1();
+
+char* askForDiff2();
+
+void printDef(Stack* stack);
+
+void printDiff(Stack* st1, Stack* st2);
+
+void printDontKnow(const char* s);
+
+void printOneEdje(Node* par, Node* chld);
+
 #endif
