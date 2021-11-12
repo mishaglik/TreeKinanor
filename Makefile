@@ -7,7 +7,7 @@ MINOR_VERSION = 0
 # BUILD_VERSION = `cat bld_version`
 # TODO: Auto increment version
 
-LIBRARIES = Logger Stack
+LIBRARIES = Logger Stack File
 
 CXXFLAGS = `cat $(LIB_DIR)Cflags`
 SANFLAGS = `cat $(LIB_DIR)SanitizeFlags`

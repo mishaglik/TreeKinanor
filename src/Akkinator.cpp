@@ -1,4 +1,8 @@
+#include <string.h>
+
 #include "../lib/Stack.h"
+#include "../lib/File.h"
+
 #include "Akkinator.h"
 #include "Akkinnator_Verbose.h"
 
@@ -146,8 +150,102 @@ void akkinatorRead(Akkinator* akkinator, const char* filename){
     LOG_ASSERT(akkinator != NULL);
     LOG_ASSERT(filename  != NULL);
 
-    akkinator->tree.root = createNode();
-    akkinator->tree.root->data = "NULL";
+    FILE* file = fopen(filename, "r");
+
+    char* text = NULL;
+    size_t size = getFileSize(file);
+    getText(file, &text, size);
+
+    fclose(file);
+
+    Node* curNode = createNode();
+    
+    akkinator->tree.root = curNode;
+
+    Stack stack = {};
+    stack_init(&stack);
+
+    char* curChr = text;
+    curChr += strspn(curChr, " \t\n");
+
+    if(*curChr !=  '{'){
+        LOG_FATAL("File has bad format\n");
+        free(text);
+        return;
+    }
+    
+    curChr++;
+    char* newStr = NULL;
+    char* nxtQuote = NULL;
+
+    while (*curChr != '\0')
+    {
+        curChr += strspn(curChr, " \t\n");
+
+        switch (*curChr)
+        {
+        case '{':
+            stack_push(&stack, curNode);
+            if(!(curNode->left)){
+                curNode->left = createNode();
+                curNode = curNode->left;
+            }
+            else{
+                if(curNode->right){
+                    LOG_FATAL("File has bad format\n");
+                    free(text);
+                    return;
+                }
+                curNode->right = createNode();
+                curNode = curNode->right;
+            }
+            curChr++;
+            break;
+
+        case '}':
+            if(stack.size == 0){
+                curChr++;
+                if(sscanf(curChr, " %*s") > 0){
+                    LOG_FATAL("Bad file format\n");
+                    free(text);
+                    return;
+                }
+                break;
+            }
+
+            stack_pop(&stack, (void**)&curNode);
+            curChr++;
+            break;
+
+        case '\"':
+            nxtQuote = strchr(curChr + 1, '\"');
+
+            if(nxtQuote == NULL){
+                LOG_FATAL("File has bad format\n");
+                free(text);
+                return;
+            }
+            newStr = (char*)mgk_calloc((size_t)(nxtQuote - (curChr + 1)), sizeof(char));
+            strncpy(newStr, curChr + 1, (size_t)(nxtQuote - (curChr + 1)));
+            
+            curNode->data = newStr;
+            stringBufferPush(&akkinator->stringBuf, newStr);
+            
+            curChr = nxtQuote + 1;
+            break;
+
+        case '\0':
+            break;
+
+        default:
+            LOG_FATAL("File has bad format\n");
+            free(text);
+            return;
+        }
+    }
+
+    free(text);
+    return;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
