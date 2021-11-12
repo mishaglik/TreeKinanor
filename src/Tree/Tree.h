@@ -40,5 +40,4 @@ void deleteNode(Node* node);
 
 void treeDtor(Tree* tree);
 
-
 #endif

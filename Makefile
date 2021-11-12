@@ -19,7 +19,7 @@ CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 
 # CXXFLAGS += $(SANFLAGS)
 
-SOURCES = Tree/Tree.cpp
+SOURCES = Tree/Tree.cpp StringBuffer/StringBuffer.cpp
 
 HEADERS_CFG = 
 
@@ -42,5 +42,5 @@ $(BIN_DIR)%.o : $(SRC_DIR)%.cpp $(addprefix $(SRC_DIR), $(HEADERS_COM))
 
 .PHONY: clean
 clean:
-	rm -f $(BIN_DIR)*
+	rm $(BIN_DIR)*
 	rm $(TARGETS)
