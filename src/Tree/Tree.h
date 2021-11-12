@@ -5,7 +5,7 @@
 #include "../../lib/Logger.h"
 #include "../../lib/utils.h"
 
-typedef char* tree_data_t;
+typedef const char* tree_data_t;
 
 enum class TreeError{
     OK = 0,
@@ -59,5 +59,6 @@ void treeDtor(Tree* tree);
 
 void treeWalk(Node* node, WalkParams* walkparams, void* args = NULL, int depth = 0);
 
+int nodeHash(Node* node);
 
 #endif

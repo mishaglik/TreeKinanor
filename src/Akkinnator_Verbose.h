@@ -8,13 +8,43 @@ enum class Answer{
     DONT_KNOW,  
 };
 
+enum class AkkMode{
+    GAME,
+    DEF,
+    DIFF,
+    DUMP,
+};
+
 Answer getAnswer(const char* question);
 
+AkkMode akkinatorAskMode();
 
-void fileWriteIn(Node* node, int depth, void* args);
+int askAgain();
+
+
+void fileWriteIn (Node* node, int depth, void* args);
 
 void fileWriteOut(Node* node, int depth, void* args);
 
 void fileWriteCur(Node* node, int depth, void* args);
+
+
+void graphWriteIn (Node* node, int depth, void* args);
+
+void graphWriteCur(Node* node, int depth, void* args);
+
+
+void printWin();
+
+void printNextTry();
+
+void printLose();
+
+void printAngry();
+
+
+char* askAskedPerson();
+
+char* askDifference(const char* first, const char* second);
 
 #endif

@@ -72,7 +72,7 @@ void treeWalk(Node* node, WalkParams* walkparams, void* args, int depth){
     }
 
     if(node->right != NULL){
-        treeWalk(node->left, walkparams, args, depth + 1);
+        treeWalk(node->right, walkparams, args, depth + 1);
     }
 
     if(walkparams->walkMode == WalkMode::Postfix){
@@ -81,4 +81,8 @@ void treeWalk(Node* node, WalkParams* walkparams, void* args, int depth){
 
     ACTION(walkparams->outFunc);
     #undef ACTION
+}
+
+int nodeHash(Node* node){
+    return *(int*)(void*)(&node);
 }
