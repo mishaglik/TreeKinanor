@@ -82,6 +82,7 @@ void akkinatorPlayGame(Akkinator* akkinator){
             stack_push(&backTrace, curNode);
             curNode = curNode->left;
             break;
+
         default:
             LOG_FATAL("Incorrect answer\n");
             break;
@@ -112,11 +113,15 @@ void akkinatorGetDefinition(Akkinator* akkinator){
     LOG_ASSERT(akkinator != NULL);
 
     char* str = askForDef();
+    LOG_INFO("Finding string \"%s\"\n", str);
+    
     Stack stack = {};
 
     stack_init(&stack);
-
-    treeFind(akkinator->tree.root, &stack, stringBufferFindSame(&akkinator->stringBuf, str));
+    if(!treeFind(akkinator->tree.root, &stack, str)){
+        printDontKnow(str);
+        return;
+    };
 
     printDef(&stack);
 
@@ -129,32 +134,33 @@ void akkinatorGetDefinition(Akkinator* akkinator){
 void akkinatorSplitDifference(Akkinator* akkinator){
     LOG_ASSERT(akkinator != NULL);
 
+    Stack st1 = {}, st2 = {};
+
     char* str1 = askForDiff1();
 
-    const char* trueStr1 = stringBufferFindSame(&akkinator->stringBuf, str1);
+    stack_init(&st1);
 
-    if(!trueStr1){
+    if(!treeFind(akkinator->tree.root, &st1, str1)){
         printDontKnow(str1);
         free(str1);
+        stack_free(&st1);
         return;
     }
 
     char* str2 = askForDiff2();
-    const char* trueStr2 = stringBufferFindSame(&akkinator->stringBuf, str2);
-    if(!trueStr2){
+    stack_init(&st2);
+
+    if(!treeFind(akkinator->tree.root, &st2, str2)){
         printDontKnow(str2);
+        stack_free(&st1);
+        stack_free(&st2);
         free(str1);
         free(str2);
         return;
     }
 
-    Stack st1 = {}, st2 = {};
-
-    stack_init(&st1);
-    stack_init(&st2);
-
-    treeFind(akkinator->tree.root, &st1, trueStr1);
-    treeFind(akkinator->tree.root, &st2, trueStr2);
+    
+    
 
     printDiff(&st1, &st2);
 
@@ -185,6 +191,10 @@ void akkinatorGraph(Akkinator* akkinator){
     char command[MAX_COMMAND_LEN] = {};
 
     sprintf(command, "dot %s -T png -o %s", AKKINATOR_GRAPH_FILENAME, AKKINATOR_IMAGE_FILENAME);
+    LOG_DEBUG("Executing commnand \"%s\"\n", command);
+    system(command);
+    sprintf(command, "eog %s", AKKINATOR_IMAGE_FILENAME);
+    LOG_DEBUG("Executing commnand \"%s\"\n", command);
     system(command);
 }
 
@@ -202,93 +212,10 @@ void akkinatorRead(Akkinator* akkinator, const char* filename){
 
     fclose(file);
 
-    Node* curNode = createNode();
+    stringBufferPush(&akkinator->stringBuf, text);
+
+    akkinatorParse(akkinator, text);
     
-    akkinator->tree.root = curNode;
-
-    Stack stack = {};
-    stack_init(&stack);
-
-    char* curChr = text;
-    curChr += strspn(curChr, " \t\n");
-
-    if(*curChr !=  '{'){
-        LOG_FATAL("File has bad format\n");
-        free(text);
-        return;
-    }
-    
-    curChr++;
-    char* newStr = NULL;
-    char* nxtQuote = NULL;
-
-    while (*curChr != '\0')
-    {
-        curChr += strspn(curChr, " \t\n");
-
-        switch (*curChr)
-        {
-        case '{':
-            stack_push(&stack, curNode);
-            if(!(curNode->left)){
-                curNode->left = createNode();
-                curNode = curNode->left;
-            }
-            else{
-                if(curNode->right){
-                    LOG_FATAL("File has bad format\n");
-                    free(text);
-                    return;
-                }
-                curNode->right = createNode();
-                curNode = curNode->right;
-            }
-            curChr++;
-            break;
-
-        case '}':
-            if(stack.size == 0){
-                curChr++;
-                if(sscanf(curChr, " %*s") > 0){
-                    LOG_FATAL("Bad file format\n");
-                    free(text);
-                    return;
-                }
-                break;
-            }
-
-            stack_pop(&stack, (void**)&curNode);
-            curChr++;
-            break;
-
-        case '\"':
-            nxtQuote = strchr(curChr + 1, '\"');
-
-            if(nxtQuote == NULL){
-                LOG_FATAL("File has bad format\n");
-                free(text);
-                return;
-            }
-            newStr = (char*)mgk_calloc((size_t)(nxtQuote - (curChr + 1)), sizeof(char));
-            strncpy(newStr, curChr + 1, (size_t)(nxtQuote - (curChr + 1)));
-            
-            curNode->data = newStr;
-            stringBufferPush(&akkinator->stringBuf, newStr);
-            
-            curChr = nxtQuote + 1;
-            break;
-
-        case '\0':
-            break;
-
-        default:
-            LOG_FATAL("File has bad format\n");
-            free(text);
-            return;
-        }
-    }
-
-    free(text);
     return;
 }
 
@@ -307,4 +234,88 @@ void akkinatorWrite(Akkinator* akkinator, const char* filename){
     fclose(file);
 }
 
+
+void akkinatorParse(Akkinator* akkinator, char* text){
+    LOG_ASSERT(akkinator != NULL);
+    LOG_ASSERT(text != NULL);
+
+    Node* curNode = createNode();
+    
+    akkinator->tree.root = curNode;
+
+    Stack stack = {};
+    stack_init(&stack);
+
+    char* curChr = text;
+    curChr += strspn(curChr, " \t\n");
+
+    if(*curChr !=  '{'){
+        LOG_FATAL("File has bad format\n");
+        return;
+    }
+    
+    curChr++;
+    char* nxtQuote = NULL;
+
+    while (*curChr != '\0')
+    {
+        curChr += strspn(curChr, " \t\n");
+
+        switch (*curChr)
+        {
+        case '{':
+            stack_push(&stack, curNode);
+            if(!(curNode->left)){
+                curNode->left = createNode();
+                curNode = curNode->left;
+            }
+            else{
+                if(curNode->right){
+                    LOG_FATAL("File has bad format\n");
+                    return;
+                }
+                curNode->right = createNode();
+                curNode = curNode->right;
+            }
+            curChr++;
+            break;
+
+        case '}':
+            if(stack.size == 0){
+                curChr++;
+                if(sscanf(curChr, " %*s") > 0){
+                    LOG_FATAL("Bad file format\n");
+                    // free(text);
+                    return;
+                }
+                break;
+            }
+
+            stack_pop(&stack, (void**)&curNode);
+            curChr++;
+            break;
+
+        case '\"':
+            nxtQuote = strchr(curChr + 1, '\"');
+
+            if(nxtQuote == NULL){
+                LOG_FATAL("File has bad format\n");
+                return;
+            }
+            curNode->data = curChr + 1;
+            
+            curChr = nxtQuote + 1;
+            *nxtQuote = '\0';
+            break;
+
+        case '\0':
+            break;
+
+        default:
+            LOG_FATAL("File has bad format\n");
+            return;
+        }
+    }
+
+}
 

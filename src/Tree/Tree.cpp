@@ -1,7 +1,11 @@
+#include<string.h>
 #include "../../lib/Stack.h"
 #undef LOCATION
 #include "Tree.h"
 
+#define STRING_COMP
+
+//TODO: add data
 Node* _createNode(MGK_CTOR_DEC){
     Node* node = (Node*)mgk_calloc(1, sizeof(Node));
 
@@ -87,13 +91,20 @@ Node* treeFind(Node* node, Stack* stack, tree_data_t search){
     LOG_ASSERT(node  != NULL);
     LOG_ASSERT(stack != NULL);
 
+    // LOG_INFO("TreeFind: node[%p], stack[%p], search: \"%s\"\n", node, stack, search);
+
     stack_push(stack, node);
 
+    #ifdef STRING_COMP
+    if(strcmp(node->data, search) == 0){
+        return node;
+    }
+    #else
     if(node->data == search){
         return node;
     }
-
-    if(node->left && treeFind(node->left, stack, search)) return (Node*)stack->data[stack->size - 1];
+    #endif
+    if(node->left  && treeFind(node->left,  stack, search)) return (Node*)stack->data[stack->size - 1];
 
     if(node->right && treeFind(node->right, stack, search)) return (Node*)stack->data[stack->size - 1];
 

@@ -30,6 +30,7 @@ int main(int argc, char* argv[]){
         case AkkMode::DUMP:
             akkinatorGraph(&akk);
             break;
+        case AkkMode::NONE:
         default:
             LOG_FATAL("Wrong akkinator mode");
             break;

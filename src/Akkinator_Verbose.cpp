@@ -3,7 +3,6 @@
 
 const size_t MAX_ANSWER_SZ = 10;
 
-//TODO: Fool protection
 Answer getAnswer(const char* question){
     LOG_ASSERT(question != NULL);
     
@@ -12,21 +11,23 @@ Answer getAnswer(const char* question){
     char answer[MAX_ANSWER_SZ] = {};
     scanf("%10s", answer);
 
-    if(strcmp(answer, "Yes") == 0){
+    if(answer[0] == 'y' || answer[0] == 'Y' || answer[0] == '1'){
         return Answer::YES;
     }
 
-    if(strcmp(answer, "No") == 0){
+    if(answer[0] == 'n' || answer[0] == 'N' || answer[0] == '0'){
         return Answer::NO;
     }
-    
+    printf("Твоё мямленье истолковано как \"Не знаю\"\n");
     return Answer::DONT_KNOW;
 }
 
 AkkMode akkinatorAskMode(){
     int mode = -1;
-    printf("Choose work mode: ");
-    scanf("%d", &mode);
+    if(mode >= (int)AkkMode::NONE || mode < 0){
+        printf("Choose work mode: ");
+        scanf("%d", &mode);
+    }
     return (AkkMode)mode;
 }
 
@@ -84,9 +85,11 @@ void graphWriteIn (Node* node, int, void* args){
     LOG_ASSERT(args != NULL);
 
     FILE* file = (FILE*)args;
-
+#ifdef DEBUG_GRAPH
+    fprintf(file, "N%p[label=\"%s[%p]\"];\n", node, node->data, node);
+#else
     fprintf(file, "N%p[label=\"%s\"];\n", node, node->data);
-    
+#endif
 }
 
 void graphWriteCur(Node* node, int, void* args){
@@ -121,9 +124,7 @@ void printAngry(){
 
 char* askAskedPerson(){
     printf("Так кто же это был?\n");
-    char* str = NULL;
-    scanf("%ms", &str);
-    return str;
+    return askString();
 }
 
 char* askDifference(const char* first, const char* second){
@@ -132,9 +133,7 @@ char* askDifference(const char* first, const char* second){
 
     printf("Так а в чем разница меджу %s и %s?\n", first, second);
 
-    char* str = NULL;
-    scanf("%ms", &str);
-    return str;
+    return askString();
 }
 
 int askAgain(){
@@ -143,29 +142,23 @@ int askAgain(){
     char answer[MAX_ANSWER_SZ] = {};
     scanf("%s", answer);
 
-    return answer[0] == 'Y' || answer[0] == 'y';
+    return answer[0] == 'Y' || answer[0] == 'y' || answer[0]=='1';
 }
 
 
 char* askForDef(){
     printf("O чём тебе поведать дорогой друг?\n");
-    char* str = NULL;
-    scanf("%ms", &str);
-    return str;
+    return askString();
 }
 
 char* askForDiff1(){
     printf("Назови 1й объект.\n");
-    char* str = NULL;
-    scanf("%ms", &str);
-    return str;
+    return askString();
 }
 
 char* askForDiff2(){
     printf("Назови 2й объект.\n");
-    char* str = NULL;
-    scanf("%ms", &str);
-    return str;
+    return askString();
 }
 
 void printDef(Stack* stack){
@@ -220,4 +213,13 @@ void printOneEdje(Node* par, Node* chld){
         printf("не ");
     }
     printf("%s, ", par->data);
+}
+
+char* askString(){
+    char* string = NULL;
+    while(string == NULL){
+        scanf(" %m[^\n]", &string);
+        LOG_DEBUG("Read string \"%s\"\n", string);
+    }
+    return string;
 }

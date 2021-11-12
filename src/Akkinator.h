@@ -28,5 +28,7 @@ void akkinatorRead(Akkinator* akkinator, const char* filename);
 
 void akkinatorWrite(Akkinator* akkinator, const char* filename);
 
+void akkinatorParse(Akkinator* akkinator, char* text);
+
 
 #endif

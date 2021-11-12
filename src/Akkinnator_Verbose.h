@@ -2,6 +2,8 @@
 #define TREEKINATOR_AKKNATOR_VERBOSE_H
 #include "Tree/Tree.h"
 
+// #define DEBUG_GRAPH
+
 enum class Answer{
     NO,
     YES,
@@ -13,6 +15,7 @@ enum class AkkMode{
     DEF,
     DIFF,
     DUMP,
+    NONE,
 };
 
 Answer getAnswer(const char* question);
@@ -60,5 +63,7 @@ void printDiff(Stack* st1, Stack* st2);
 void printDontKnow(const char* s);
 
 void printOneEdje(Node* par, Node* chld);
+
+char* askString();
 
 #endif
