@@ -94,7 +94,7 @@ void akkinatorPlayGame(Akkinator* akkinator){
         return;
 
     char* newPerson  = askAskedPerson();
-    char* difference = askDifference(curNode->data, newPerson);
+    char* difference = askDifference(newPerson, curNode->data);
 
     stringBufferPush(&akkinator->stringBuf, newPerson);
     stringBufferPush(&akkinator->stringBuf, difference);

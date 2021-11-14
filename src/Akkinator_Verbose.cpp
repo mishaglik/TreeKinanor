@@ -1,12 +1,22 @@
 #include <string.h>
 #include "Akkinnator_Verbose.h"
 
+// #define printf(...) {voice(__VA_ARGS__); printf(__VA_ARGS__);}
+
 const size_t MAX_ANSWER_SZ = 10;
+
+const size_t MAX_TTS_COMMAND_SZ = 1000;
+
+char PRINT_STRING[MAX_TTS_COMMAND_SZ] = {};
+size_t print_string_iter = 0;
+
+#define printf(...) myprintf(__VA_ARGS__)
 
 Answer getAnswer(const char* question){
     LOG_ASSERT(question != NULL);
     
     printf("Это %s?\n", question);
+    flush_global_string();
 
     char answer[MAX_ANSWER_SZ] = {};
     scanf("%10s", answer);
@@ -19,13 +29,15 @@ Answer getAnswer(const char* question){
         return Answer::NO;
     }
     printf("Твоё мямленье истолковано как \"Не знаю\"\n");
+    flush_global_string();
     return Answer::DONT_KNOW;
 }
 
 AkkMode akkinatorAskMode(){
     int mode = -1;
     if(mode >= (int)AkkMode::NONE || mode < 0){
-        printf("Choose work mode: ");
+        printf("Выберите режим работы: ");
+        flush_global_string();
         scanf("%d", &mode);
     }
     return (AkkMode)mode;
@@ -106,24 +118,29 @@ void graphWriteCur(Node* node, int, void* args){
 }
 
 void printWin(){
-    printf("Я победил, ха. Я самый умный у меня неуд(10)\n");
+    printf("Я победил, ха. Я самый умный у меня неуд (11)\n");
+    flush_global_string();
 }
 
 void printNextTry(){
     printf("Ладно, попробуем ещё...\n");
+    flush_global_string();
 }
 
 void printLose(){
     printf("Хорошо, я сдаюсь. Ты победил.\n");
+    flush_global_string();
 }
 
 void printAngry(){
     printf("Как я погляжу ты сам не знаешь кого загадал. Так что будем считать я победил.\n");
+    flush_global_string();
 }
 
 
 char* askAskedPerson(){
     printf("Так кто же это был?\n");
+    flush_global_string();
     return askString();
 }
 
@@ -132,12 +149,14 @@ char* askDifference(const char* first, const char* second){
     LOG_ASSERT(second != NULL);
 
     printf("Так а в чем разница меджу %s и %s?\n", first, second);
+    flush_global_string();
 
     return askString();
 }
 
 int askAgain(){
     printf("Ещё разочек?\n");
+    flush_global_string();
 
     char answer[MAX_ANSWER_SZ] = {};
     scanf("%s", answer);
@@ -148,16 +167,19 @@ int askAgain(){
 
 char* askForDef(){
     printf("O чём тебе поведать дорогой друг?\n");
+    flush_global_string();
     return askString();
 }
 
 char* askForDiff1(){
     printf("Назови 1й объект.\n");
+    flush_global_string();
     return askString();
 }
 
 char* askForDiff2(){
     printf("Назови 2й объект.\n");
+    flush_global_string();
     return askString();
 }
 
@@ -169,6 +191,7 @@ void printDef(Stack* stack){
         printOneEdje((Node*)(stack->data[i]), (Node*)(stack->data[i+1]));
     }
     printf("\n");
+    flush_global_string();
 }
 
 void printDiff(Stack* st1, Stack* st2){
@@ -188,21 +211,28 @@ void printDiff(Stack* st1, Stack* st2){
     printf("\n");
     printf("Но %s ", ((Node*)(st1->data[st1->size - 1]))->data);
     for(size_t i = nCommon; i < st1->size - 1; ++i){
+        if(i == st1->size - 2){
+            printf("и ");
+        }
         printOneEdje((Node*)st1->data[i], (Node*)st1->data[i+1]);
     }
     printf("\n");
     printf("A %s ", ((Node*)(st2->data[st2->size - 1]))->data);
     for(size_t i = nCommon; i < st2->size - 1; ++i){
+        if(i == st2->size - 2){
+            printf("и ");
+        }
         printOneEdje((Node*)st2->data[i], (Node*)st2->data[i+1]);
     }
     printf("\n");
-
+    flush_global_string();
 }
 
 void printDontKnow(const char* s){
     LOG_ASSERT(s != NULL);
 
     printf("Увы я ничего не знаю о %s\n", s);
+    flush_global_string();
 }
 
 void printOneEdje(Node* par, Node* chld){
@@ -222,4 +252,37 @@ char* askString(){
         LOG_DEBUG("Read string \"%s\"\n", string);
     }
     return string;
+}
+
+void voice(const char* format, ...){
+    LOG_ASSERT(format != NULL);
+
+    char command[2*MAX_TTS_COMMAND_SZ] = {};
+    char string [MAX_TTS_COMMAND_SZ] = {};
+
+    va_list args;
+    va_start(args, format);
+    vsprintf(string, format, args);
+    va_end(args);
+
+    sprintf(command,"./voice.sh \"%s\"", string);
+
+    system(command);
+}
+
+#undef printf
+
+void myprintf(const char* format, ...){
+
+    va_list args;
+    va_start(args, format);
+    print_string_iter += vsprintf(PRINT_STRING + print_string_iter, format, args);
+    va_end(args);
+
+}
+
+void flush_global_string(){
+    printf("%s", PRINT_STRING);
+    voice(PRINT_STRING);
+    print_string_iter = 0;
 }

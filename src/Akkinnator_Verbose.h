@@ -1,6 +1,8 @@
 #ifndef TREEKINATOR_AKKNATOR_VERBOSE_H
 #define TREEKINATOR_AKKNATOR_VERBOSE_H
 #include "Tree/Tree.h"
+#include <stdarg.h>
+
 
 // #define DEBUG_GRAPH
 
@@ -66,4 +68,9 @@ void printOneEdje(Node* par, Node* chld);
 
 char* askString();
 
+void voice(const char* format, ...);
+
+void myprintf(const char* format, ...);
+
+void flush_global_string();
 #endif
